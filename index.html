@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Handlebars</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <link rel="stylesheet" href="main.css">
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min.js'></script>
+</head>
+<body>
+    <!-- Element for outputting Handlebars -->
+    <section id='renderedContent'></section>
+
+    <!-- Handlebars template -->
+    <script id='myTemplate' type='text/x-handlebars-template'>
+        {{#each this}}
+          <article>
+              <h1>{{name}}</h1>
+          </article>
+        {{/each}}
+    </script>
+
+    <script>
+    //Handlebars Rendering
+    (function() {
+      // Prepare template
+      var templateSource = document.getElementById('myTemplate').innerHTML;
+      var template = Handlebars.compile(templateSource);
+
+      //AJAX request to get data.json
+      var url = 'data.json';
+      ajax('GET',
+            url,
+            function(req) {
+              var res = JSON.parse(req.responseText);
+              console.log(res);
+              // Generate html using template and data
+              var html = template(res.data);
+
+              // Add the result to the DOM
+              document.getElementById('renderedContent').innerHTML = html;
+              document.title = 'Handlebars';
+            },
+            function(req) {
+              console.error('AJAX error:\n', req.responseText);
+            }
+      );
+
+      function ajax(method, url, successCallback, errorCallback) {
+        var request = new XMLHttpRequest();
+        request.open(method, url, true);
+
+        request.onload = function() {
+          if (request.status >= 200 && request.status < 400){
+            // Success!
+            successCallback(request);
+          } else {
+            // We reached our target server, but it returned an error
+            errorCallback(request)
+          }
+        };
+
+        request.onerror = function() {
+          console.error('Error with AJAX request');
+        };
+
+        request.send();
+      }
+    })();
+    </script>
+</body>
+</html>
